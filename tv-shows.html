@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamFlix - TV Shows</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        * { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .navbar { background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.98) 100%); }
+        .movie-card { position: relative; overflow: hidden; border-radius: 16px; cursor: pointer; }
+        .movie-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        .movie-card:hover img { transform: scale(1.12); }
+        .movie-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.3) 50%, transparent); opacity: 0; display: flex; align-items: flex-end; padding: 16px; }
+        .movie-card:hover .movie-overlay { opacity: 1; }
+        .nav-link:after { content: ''; position: absolute; width: 0; height: 3px; bottom: -2px; left: 0; background-color: #e50914; }
+        .nav-link:hover:after, .nav-link.active:after { width: 100%; }
+        .action-btn { font-size: 11px; font-weight: 700; padding: 8px 12px; border-radius: 6px; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-white">
+
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 border-b border-white/10">
+        <div class="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-x-2">
+                <div class="w-9 h-9 bg-[#e50914] rounded flex items-center justify-center text-white font-bold text-2xl">S</div>
+                <h1 class="text-3xl font-bold tracking-tighter">StreamFlix</h1>
+            </div>
+            <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                <a href="index.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-home"></i> Home</a>
+                <a href="browse.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-compass"></i> Browse</a>
+                <a href="movies.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-film"></i> Movies</a>
+                <a href="tv-shows.html" class="nav-link active text-[#e50914]"><i class="fas fa-tv"></i> TV Shows</a>
+                <a href="continue-watching.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-history"></i> Continue Watching</a>
+                <a href="my-list.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-bookmark"></i> My List</a>
+            </div>
+            <div class="flex items-center gap-x-6">
+                <i onclick="toggleSearch()" class="fas fa-search text-xl cursor-pointer"></i>
+                <div onclick="showNotifications()" class="relative cursor-pointer"><i class="fas fa-bell text-xl"></i></div>
+                <div onclick="toggleProfileMenu()" class="flex items-center cursor-pointer">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-sm font-bold">J</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-screen-2xl mx-auto px-8 pt-28 pb-16">
+        <h1 class="text-5xl font-bold mb-12">TV Shows</h1>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-6">
+
+            <div class="movie-card bg-zinc-900" onclick="#">
+                <img src="https://picsum.photos/id/342/300/450" alt="Shogun">
+                <div class="movie-overlay">
+                    <div class="w-full space-y-3">
+                        <div class="flex gap-2">
+                            <button onclick="event.stopImmediatePropagation(); playShow(12)" class="action-btn flex-1 bg-white text-black">PLAY</button>
+                            <button onclick="event.stopImmediatePropagation(); watchTrailer(12)" class="action-btn flex-1 bg-white/30 hover:bg-white/40">TRAILER</button>
+                        </div>
+                        <button onclick="event.stopImmediatePropagation(); addToMyList(12)" class="action-btn w-full border border-white hover:bg-white/10">+ MY LIST</button>
+                    </div>
+                </div>
+                <div class="p-4"><div class="font-semibold">Shōgun</div><div class="text-xs text-zinc-400">2024 • 9.1</div></div>
+            </div>
+
+            <div class="movie-card bg-zinc-900" onclick="#">
+                <img src="https://picsum.photos/id/380/300/450" alt="Fallout">
+                <div class="movie-overlay">
+                    <div class="w-full space-y-3">
+                        <div class="flex gap-2">
+                            <button onclick="event.stopImmediatePropagation(); playShow(14)" class="action-btn flex-1 bg-white text-black">PLAY</button>
+                            <button onclick="event.stopImmediatePropagation(); watchTrailer(14)" class="action-btn flex-1 bg-white/30 hover:bg-white/40">TRAILER</button>
+                        </div>
+                        <button onclick="event.stopImmediatePropagation(); addToMyList(14)" class="action-btn w-full border border-white hover:bg-white/10">+ MY LIST</button>
+                    </div>
+                </div>
+                <div class="p-4"><div class="font-semibold">Fallout</div><div class="text-xs text-zinc-400">2024 • 8.7</div></div>
+            </div>
+
+            <div class="movie-card bg-zinc-900" onclick="#">
+                <img src="images/ar.pg" alt="Arcane">
+                <div class="movie-overlay">
+                    <div class="w-full space-y-3">
+                        <div class="flex gap-2">
+                            <button onclick="event.stopImmediatePropagation(); playShow(21)" class="action-btn flex-1 bg-white text-black">PLAY</button>
+                            <button onclick="event.stopImmediatePropagation(); watchTrailer(21)" class="action-btn flex-1 bg-white/30 hover:bg-white/40">TRAILER</button>
+                        </div>
+                        <button onclick="event.stopImmediatePropagation(); addToMyList(21)" class="action-btn w-full border border-white hover:bg-white/10">+ MY LIST</button>
+                    </div>
+                </div>
+                <div class="p-4"><div class="font-semibold">Arcane Season 2</div><div class="text-xs text-zinc-400">2024 • 9.3</div></div>
+            </div>
+
+            <div class="movie-card bg-zinc-900" onclick="#">
+                <img src="https://picsum.photos/id/318/300/450" alt="House of the Dragon">
+                <div class="movie-overlay">
+                    <div class="w-full space-y-3">
+                        <div class="flex gap-2">
+                            <button onclick="event.stopImmediatePropagation(); playShow(11)" class="action-btn flex-1 bg-white text-black">PLAY</button>
+                            <button onclick="event.stopImmediatePropagation(); watchTrailer(11)" class="action-btn flex-1 bg-white/30 hover:bg-white/40">TRAILER</button>
+                        </div>
+                        <button onclick="event.stopImmediatePropagation(); addToMyList(11)" class="action-btn w-full border border-white hover:bg-white/10">+ MY LIST</button>
+                    </div>
+                </div>
+                <div class="p-4"><div class="font-semibold">House of the Dragon</div><div class="text-xs text-zinc-400">2022 • 8.5</div></div>
+            </div>
+
+            <div class="movie-card bg-zinc-900" onclick="#">
+                <img src="https://picsum.photos/id/420/300/450" alt="The Boys">
+                <div class="movie-overlay">
+                    <div class="w-full space-y-3">
+                        <div class="flex gap-2">
+                            <button onclick="event.stopImmediatePropagation(); playShow(16)" class="action-btn flex-1 bg-white text-black">PLAY</button>
+                            <button onclick="event.stopImmediatePropagation(); watchTrailer(16)" class="action-btn flex-1 bg-white/30 hover:bg-white/40">TRAILER</button>
+                        </div>
+                        <button onclick="event.stopImmediatePropagation(); addToMyList(16)" class="action-btn w-full border border-white hover:bg-white/10">+ MY LIST</button>
+                    </div>
+                </div>
+                <div class="p-4"><div class="font-semibold">The Boys</div><div class="text-xs text-zinc-400">2019 • 8.7</div></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- VIDEO MODAL -->
+    <div id="video-modal" onclick="if(event.target.id==='video-modal')closeModal()" class="hidden fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center">
+        <div class="bg-zinc-900 rounded-3xl max-w-4xl w-full mx-4 overflow-hidden">
+            <div class="flex justify-between items-center px-8 py-5 border-b border-white/10">
+                <h3 id="modal-title" class="text-2xl font-semibold"></h3>
+                <button onclick="closeModal()" class="text-4xl hover:text-[#e50914]">×</button>
+            </div>
+            <div id="modal-content" class="p-8"></div>
+        </div>
+    </div>
+
+    <script>
+        let myList = JSON.parse(localStorage.getItem('streamflixMyList')) || [];
+
+        function saveMyList() {
+            localStorage.setItem('streamflixMyList', JSON.stringify(myList));
+        }
+
+        function addToMyList(id) {
+            if (!myList.includes(id)) {
+                myList.push(id);
+                saveMyList();
+                alert("✅ Added to My List!");
+            } else {
+                alert("Already in My List");
+            }
+            event.stopImmediatePropagation();
+        }
+
+        function viewShow(id) {
+            window.location.href = `movie.html?id=${id}`;
+        }
+
+        function playShow(id) {
+            document.getElementById('modal-title').innerHTML = `Now Playing`;
+            document.getElementById('modal-content').innerHTML = `<div class="aspect-video bg-zinc-950 rounded-2xl flex items-center justify-center"><div class="text-center"><i class="fas fa-play-circle text-8xl text-white/70 mb-6"></i><p class="text-xl">Streaming in 4K HDR</p></div></div>`;
+            document.getElementById('video-modal').classList.remove('hidden');
+        }
+
+        function watchTrailer(id) {
+            const trailers = {12:"T7f3z7r7Z8Q",14:"aWzlQ2N6qqg",21:"aWzlQ2N6qqg",11:"T7f3z7r7Z8Q",16:"mqqft2x_Aa4"};
+            document.getElementById('modal-title').innerHTML = `Trailer`;
+            document.getElementById('modal-content').innerHTML = `<div class="aspect-video"><iframe width="100%" height="100%" src="https://www.youtube.com/embed/${trailers[id] || 'dQw4w9wgxcq'}" frameborder="0" allowfullscreen></iframe></div>`;
+            document.getElementById('video-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('video-modal').classList.add('hidden');
+        }
+
+        function toggleSearch() { alert("Search coming soon"); }
+        function showNotifications() { alert("New episodes!"); }
+        function toggleProfileMenu() { alert("Premium Account"); }
+    </script>
+</body>
+</html>

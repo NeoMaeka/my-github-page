@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamFlix - Movie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        
+        * { transition: all 0.2s ease; }
+        .navbar {
+            background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.98) 100%);
+        }
+        .backdrop {
+            background-size: cover;
+            background-position: center;
+            height: 85vh;
+            position: relative;
+        }
+        .movie-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .movie-card:hover {
+            transform: scale(1.08) translateY(-6px);
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            bottom: -2px;
+            left: 0;
+            background-color: #e50914;
+        }
+        .nav-link:hover:after { width: 100%; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-white">
+
+    <!-- SHARED NAVIGATION -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 border-b border-white/10">
+        <div class="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-x-2">
+                <div class="w-9 h-9 bg-[#e50914] rounded flex items-center justify-center text-white font-bold text-2xl">S</div>
+                <h1 class="text-3xl font-bold tracking-tighter">StreamFlix</h1>
+            </div>
+
+            <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                <a href="index.html" class="nav-link hover:text-[#e50914] flex items-center gap-x-1"><i class="fas fa-home"></i> Home</a>
+                <a href="browse.html" class="nav-link hover:text-[#e50914] flex items-center gap-x-1"><i class="fas fa-compass"></i> Browse</a>
+                <a href="movies.html" class="nav-link hover:text-[#e50914] flex items-center gap-x-1"><i class="fas fa-film"></i> Movies</a>
+                <a href="tv-shows.html" class="nav-link hover:text-[#e50914] flex items-center gap-x-1"><i class="fas fa-tv"></i> TV Shows</a>
+                <a href="continue-watching.html" class="nav-link hover:text-[#e50914] flex items-center gap-x-1"><i class="fas fa-history"></i> Continue Watching</a>
+                <a href="my-list.html" class="nav-link hover:text-[#e50914] flex items-center gap-x-1"><i class="fas fa-bookmark"></i> My List</a>
+            </div>
+
+            <div class="flex items-center gap-x-6">
+                <div onclick="toggleSearch()" class="cursor-pointer"><i class="fas fa-search text-xl"></i></div>
+                <div onclick="showNotifications()" class="relative cursor-pointer">
+                    <i class="fas fa-bell text-xl"></i>
+                </div>
+                <div onclick="toggleProfileMenu()" class="flex items-center cursor-pointer">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-sm font-bold">J</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MOVIE DETAIL CONTENT -->
+    <div id="movie-content">
+        <!-- Populated by JavaScript based on ?id= from URL -->
+    </div>
+
+    <!-- VIDEO MODAL -->
+    <div id="video-modal" onclick="if(event.target.id==='video-modal')closeModal()" 
+         class="hidden fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center">
+        <div class="modal bg-zinc-900 rounded-3xl max-w-5xl w-full mx-4 overflow-hidden">
+            <div class="flex justify-between items-center px-8 py-5 border-b border-white/10">
+                <h3 id="modal-title" class="text-2xl font-semibold"></h3>
+                <button onclick="closeModal()" class="text-4xl hover:text-[#e50914]">×</button>
+            </div>
+            <div id="modal-content" class="p-8"></div>
+        </div>
+    </div>
+
+    <script>
+        // Full movie database (same as homepage)
+        const movies = {
+            1: {
+                id: 1,
+                title: "Dune: Part Two",
+                year: 2024,
+                rating: 8.9,
+                duration: "2h 46m",
+                genres: ["Sci-Fi", "Action", "Adventure"],
+                description: "Paul Atreides unites with Chani and the Fremen people of Arrakis while seeking revenge against his enemies in a war for the galaxy's most valuable asset.",
+                poster: "images/dune.jpg",
+                backdrop: "https://picsum.photos/id/1015/1920/1080",
+                trailerId: "U_x15k9jY7E"
+            },
+            7: {
+                id: 7,
+                title: "Deadpool & Wolverine",
+                year: 2024,
+                rating: 8.4,
+                duration: "2h 7m",
+                genres: ["Action", "Comedy"],
+                description: "Deadpool is offered a place in the Marvel Cinematic Universe by the Time Variance Authority, but instead recruits a variant of Wolverine to save his world from extinction.",
+                poster: "https://picsum.photos/id/201/600/900",
+                backdrop: "https://picsum.photos/id/201/1920/1080",
+                trailerId: "xB5ce8j8Z8o"
+            },
+            12: {
+                id: 12,
+                title: "Shōgun",
+                year: 2024,
+                rating: 9.1,
+                duration: "60 min",
+                genres: ["Drama", "History", "War"],
+                description: "An English navigator becomes both a vassal and a threat to the powerful Japanese lord as political intrigue and war threaten to tear the country apart.",
+                poster: "https://picsum.photos/id/342/600/900",
+                backdrop: "https://picsum.photos/id/342/1920/1080",
+                trailerId: "T7f3z7r7Z8Q"
+            },
+            14: {
+                id: 14,
+                title: "Fallout",
+                year: 2024,
+                rating: 8.7,
+                duration: "55 min",
+                genres: ["Action", "Adventure", "Sci-Fi"],
+                description: "In a future where mankind has nuked the surface of the planet, a young woman journeys across the wasteland to find her father and the truth about the world she left behind.",
+                poster: "https://picsum.photos/id/380/600/900",
+                backdrop: "https://picsum.photos/id/380/1920/1080",
+                trailerId: "aWzlQ2N6qqg"
+            },
+            17: {
+                id: 17,
+                title: "Echoes of Eternity",
+                year: 2025,
+                rating: 9.2,
+                duration: "2h 22m",
+                genres: ["Sci-Fi", "Drama"],
+                description: "StreamFlix Original. A brilliant scientist discovers a way to communicate with the future, but every message sent changes the timeline in dangerous ways.",
+                poster: "images/echo.jpg",
+                backdrop: "https://picsum.photos/id/451/1920/1080",
+                trailerId: "TcMBFSGVi1U"
+            },
+            29: {
+                id: 29,
+                title: "Starfall",
+                year: 2025,
+                rating: 9.0,
+                duration: "2h 29m",
+                genres: ["Sci-Fi", "Drama"],
+                description: "StreamFlix Original. As humanity faces its final stand against an unknown cosmic force, a small crew must make the ultimate sacrifice.",
+                poster: "https://picsum.photos/id/700/600/900",
+                backdrop: "https://picsum.photos/id/700/1920/1080",
+                trailerId: "xB5ce8j8Z8o"
+            }
+            // Add more movies here when you expand other pages
+        };
+
+        function getMovieIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return parseInt(params.get('id')) || 1;
+        }
+
+        function renderMoviePage() {
+            const id = getMovieIdFromUrl();
+            const movie = movies[id] || movies[1]; // fallback to Dune
+
+            const html = `
+                <div class="backdrop" style="background-image: url('${movie.backdrop}')">
+                    <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent"></div>
+                    
+                    <div class="absolute bottom-0 left-0 right-0 max-w-screen-2xl mx-auto px-8 pb-12">
+                        <div class="flex flex-col md:flex-row gap-10">
+                            <!-- Poster -->
+                            <div class="w-64 flex-shrink-0">
+                                <img src="${movie.poster}" alt="${movie.title}" 
+                                     class="rounded-2xl shadow-2xl border border-white/10">
+                            </div>
+                            
+                            <!-- Info -->
+                            <div class="flex-1">
+                                <h1 class="text-6xl font-bold tracking-tighter mb-3">${movie.title}</h1>
+                                <div class="flex items-center gap-x-6 text-lg mb-6">
+                                    <div class="flex items-center gap-x-1">
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                        <span class="font-semibold">${movie.rating}</span>
+                                    </div>
+                                    <span>${movie.year}</span>
+                                    <span>${movie.duration}</span>
+                                    <span class="bg-white/20 px-3 py-1 text-xs rounded font-medium">HD</span>
+                                </div>
+                                
+                                <div class="flex gap-x-2 mb-8">
+                                    ${movie.genres.map(g => `<span class="bg-white/10 px-4 py-2 rounded-full text-sm">${g}</span>`).join('')}
+                                </div>
+                                
+                                <p class="text-lg max-w-2xl leading-relaxed mb-10">${movie.description}</p>
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex flex-wrap gap-4">
+                                    <button onclick="playMovie(${movie.id})" 
+                                            class="bg-white text-black font-bold px-10 py-4 rounded-xl flex items-center gap-x-3 text-xl hover:bg-white/90">
+                                        <i class="fas fa-play"></i> PLAY MOVIE
+                                    </button>
+                                    
+                                    <button onclick="watchTrailer(${movie.id})" 
+                                            class="bg-white/20 hover:bg-white/30 font-bold px-10 py-4 rounded-xl flex items-center gap-x-3 text-xl">
+                                        <i class="fas fa-info-circle"></i> WATCH TRAILER
+                                    </button>
+                                    
+                                    <button onclick="addToMyList(${movie.id})" 
+                                            class="border-2 border-white/70 hover:border-white font-bold px-10 py-4 rounded-xl flex items-center gap-x-3 text-xl">
+                                        <i class="fas fa-plus"></i> MY LIST
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details Section -->
+                <div class="max-w-screen-2xl mx-auto px-8 py-12">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                        <!-- Main Content -->
+                        <div class="lg:col-span-8">
+                            <h2 class="text-2xl font-semibold mb-6">About This Title</h2>
+                            <p class="text-zinc-300 leading-relaxed">${movie.description}</p>
+                            
+                            <!-- Cast -->
+                            <div class="mt-16">
+                                <h3 class="text-xl font-semibold mb-6">Cast</h3>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                                    <div class="text-center">
+                                        <div class="w-28 h-28 mx-auto bg-zinc-800 rounded-full mb-3"></div>
+                                        <div class="font-medium">Timothée Chalamet</div>
+                                        <div class="text-xs text-zinc-400">Paul Atreides</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="w-28 h-28 mx-auto bg-zinc-800 rounded-full mb-3"></div>
+                                        <div class="font-medium">Zendaya</div>
+                                        <div class="text-xs text-zinc-400">Chani</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="w-28 h-28 mx-auto bg-zinc-800 rounded-full mb-3"></div>
+                                        <div class="font-medium">Rebecca Ferguson</div>
+                                        <div class="text-xs text-zinc-400">Lady Jessica</div>
+                                    </div>
+                                    <div class="text-center">
+                                        <div class="w-28 h-28 mx-auto bg-zinc-800 rounded-full mb-3"></div>
+                                        <div class="font-medium">Austin Butler</div>
+                                        <div class="text-xs text-zinc-400">Feyd-Rautha</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar -->
+                        <div class="lg:col-span-4">
+                            <div class="bg-zinc-900 rounded-3xl p-8">
+                                <h3 class="font-semibold mb-4">More Like This</h3>
+                                <div class="space-y-6">
+                                    <div onclick="#" class="flex gap-4 cursor-pointer hover:bg-white/5 p-2 rounded-2xl">
+                                        <img src="https://picsum.photos/id/700/80/120" class="w-20 rounded-xl">
+                                        <div>
+                                            <div class="font-medium">Starfall</div>
+                                            <div class="text-xs text-zinc-400">2025 • 9.0</div>
+                                        </div>
+                                    </div>
+                                    <div onclick="#'" class="flex gap-4 cursor-pointer hover:bg-white/5 p-2 rounded-2xl">
+                                        <img src="https://picsum.photos/id/451/80/120" class="w-20 rounded-xl">
+                                        <div>
+                                            <div class="font-medium">Echoes of Eternity</div>
+                                            <div class="text-xs text-zinc-400">2025 • 9.2</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('movie-content').innerHTML = html;
+        }
+
+        // Player functions
+        function playMovie(id) {
+            const movie = Object.values(movies).find(m => m.id === id) || movies[1];
+            const modal = document.getElementById('video-modal');
+            document.getElementById('modal-title').innerHTML = `Now Playing: <span class="text-[#e50914]">${movie.title}</span>`;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="aspect-video bg-zinc-950 flex items-center justify-center rounded-2xl">
+                    <div class="text-center">
+                        <i class="fas fa-play-circle text-8xl text-white/70 mb-8"></i>
+                        <p class="text-2xl font-medium">Streaming in 4K • HDR • Dolby Vision</p>
+                        <p class="text-zinc-400 mt-4">This is a premium demo player</p>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function watchTrailer(id) {
+            const movie = Object.values(movies).find(m => m.id === id) || movies[1];
+            const modal = document.getElementById('video-modal');
+            document.getElementById('modal-title').innerHTML = `Trailer: ${movie.title}`;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="aspect-video">
+                    <iframe width="100%" height="100%" 
+                        src="https://www.youtube.com/embed/${movie.trailerId}" 
+                        frameborder="0" allowfullscreen></iframe>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function addToMyList(id) {
+            alert(`✅ "${movies[id]?.title || 'Movie'}" has been added to My List!`);
+        }
+
+        function closeModal() {
+            document.getElementById('video-modal').classList.add('hidden');
+        }
+
+        function toggleSearch() { alert("Search opened - Try browse.html"); }
+        function showNotifications() { alert("New releases just dropped!"); }
+        function toggleProfileMenu() { alert("Premium Account • Jeremy"); }
+
+        // Initialize page
+        window.onload = renderMoviePage;
+    </script>
+</body>
+</html>

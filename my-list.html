@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamFlix - My List</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        * { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .navbar { background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.98) 100%); }
+        .movie-card { position: relative; overflow: hidden; border-radius: 16px; cursor: pointer; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-white">
+
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 border-b border-white/10">
+        <div class="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-x-2">
+                <div class="w-9 h-9 bg-[#e50914] rounded flex items-center justify-center text-white font-bold text-2xl">S</div>
+                <h1 class="text-3xl font-bold tracking-tighter">StreamFlix</h1>
+            </div>
+            <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                <a href="index.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-home"></i> Home</a>
+                <a href="browse.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-compass"></i> Browse</a>
+                <a href="movies.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-film"></i> Movies</a>
+                <a href="tv-shows.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-tv"></i> TV Shows</a>
+                <a href="continue-watching.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-history"></i> Continue Watching</a>
+                <a href="my-list.html" class="nav-link active text-[#e50914]"><i class="fas fa-bookmark"></i> My List</a>
+            </div>
+            <div class="flex items-center gap-x-6">
+                <i onclick="toggleSearch()" class="fas fa-search text-xl cursor-pointer"></i>
+                <div onclick="showNotifications()" class="relative cursor-pointer"><i class="fas fa-bell text-xl"></i></div>
+                <div onclick="toggleProfileMenu()" class="flex items-center cursor-pointer">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-sm font-bold">J</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-screen-2xl mx-auto px-8 pt-28 pb-16">
+        <h1 class="text-5xl font-bold mb-8">My List</h1>
+        <div id="my-list-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6"></div>
+    </div>
+
+    <script>
+        const movieData = {
+            1: {title: "Dune: Part Two", poster: "https://picsum.photos/id/1015/300/450"},
+            7: {title: "Deadpool & Wolverine", poster: "https://picsum.photos/id/201/300/450"},
+            2: {title: "Oppenheimer", poster: "https://picsum.photos/id/1005/300/450"},
+            4: {title: "The Batman", poster: "https://picsum.photos/id/102/300/450"},
+            9: {title: "Top Gun: Maverick", poster: "https://picsum.photos/id/251/300/450"},
+            10: {title: "John Wick: Chapter 4", poster: "https://picsum.photos/id/292/300/450"},
+            17: {title: "Echoes of Eternity", poster: "https://picsum.photos/id/451/300/450"},
+            29: {title: "Starfall", poster: "https://picsum.photos/id/700/300/450"},
+            3: {title: "Barbie", poster: "https://picsum.photos/id/1016/300/450"},
+            8: {title: "Spider-Man: No Way Home", poster: "https://picsum.photos/id/211/300/450"},
+            20: {title: "The Last Signal", poster: "https://picsum.photos/id/520/300/450"},
+            24: {title: "Kingdom of Ash", poster: "https://picsum.photos/id/600/300/450"},
+            12: {title: "Shōgun", poster: "https://picsum.photos/id/342/300/450"},
+            14: {title: "Fallout", poster: "https://picsum.photos/id/380/300/450"},
+            21: {title: "Arcane Season 2", poster: "https://picsum.photos/id/540/300/450"},
+            11: {title: "House of the Dragon", poster: "https://picsum.photos/id/318/300/450"},
+            16: {title: "The Boys", poster: "https://picsum.photos/id/420/300/450"}
+        };
+
+        function renderMyList() {
+            const myList = JSON.parse(localStorage.getItem('streamflixMyList')) || [];
+            const container = document.getElementById('my-list-container');
+            container.innerHTML = '';
+
+            if (myList.length === 0) {
+                container.innerHTML = `<p class="col-span-full text-center text-zinc-400 py-20">Your list is empty. Start adding from Movies or TV Shows.</p>`;
+                return;
+            }
+
+            myList.forEach(id => {
+                const item = movieData[id];
+                if (item) {
+                    const div = document.createElement('div');
+                    div.className = "movie-card bg-zinc-900 relative";
+                    div.innerHTML = `
+                        <img src="${item.poster}" alt="${item.title}">
+                        <div class="p-4">
+                            <div class="font-semibold">${item.title}</div>
+                        </div>
+                        <button onclick="removeFromList(${id}, this); event.stopImmediatePropagation();" 
+                                class="absolute top-3 right-3 bg-red-600 text-white text-xs px-3 py-1 rounded hover:bg-red-700">
+                            REMOVE
+                        </button>
+                    `;
+                    div.onclick = () => window.location.href = `movie.html?id=${id}`;
+                    container.appendChild(div);
+                }
+            });
+        }
+
+        function removeFromList(id, btn) {
+            let myList = JSON.parse(localStorage.getItem('streamflixMyList')) || [];
+            myList = myList.filter(item => item !== id);
+            localStorage.setItem('streamflixMyList', JSON.stringify(myList));
+            renderMyList(); // Refresh the list
+        }
+
+        window.onload = renderMyList;
+
+        function toggleSearch() { alert("Search"); }
+        function showNotifications() { alert("Notifications"); }
+        function toggleProfileMenu() { alert("Premium"); }
+    </script>
+</body>
+</html>

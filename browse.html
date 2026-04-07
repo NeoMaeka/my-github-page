@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamFlix - Browse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+        * { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .navbar { background: linear-gradient(to bottom, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.98) 100%); }
+        .movie-card { position: relative; overflow: hidden; border-radius: 16px; cursor: pointer; }
+        .movie-card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        .movie-card:hover img { transform: scale(1.12); }
+        .movie-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.3) 50%, transparent); opacity: 0; display: flex; align-items: flex-end; padding: 16px; }
+        .movie-card:hover .movie-overlay { opacity: 1; }
+        .nav-link:after { content: ''; position: absolute; width: 0; height: 3px; bottom: -2px; left: 0; background-color: #e50914; }
+        .nav-link:hover:after, .nav-link.active:after { width: 100%; }
+        .action-btn { font-size: 11px; font-weight: 700; padding: 8px 12px; border-radius: 6px; }
+        .star { cursor: pointer; }
+    </style>
+</head>
+<body class="bg-zinc-950 text-white">
+
+    <!-- SHARED NAV -->
+    <nav class="navbar fixed top-0 left-0 right-0 z-50 border-b border-white/10">
+        <div class="max-w-screen-2xl mx-auto px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-x-2">
+                <div class="w-9 h-9 bg-[#e50914] rounded flex items-center justify-center text-white font-bold text-2xl">S</div>
+                <h1 class="text-3xl font-bold tracking-tighter">StreamFlix</h1>
+            </div>
+            <div class="hidden md:flex items-center gap-x-8 text-sm font-medium">
+                <a href="index.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-home"></i> Home</a>
+                <a href="browse.html" class="nav-link active text-[#e50914]"><i class="fas fa-compass"></i> Browse</a>
+                <a href="movies.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-film"></i> Movies</a>
+                <a href="tv-shows.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-tv"></i> TV Shows</a>
+                <a href="continue-watching.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-history"></i> Continue Watching</a>
+                <a href="my-list.html" class="nav-link hover:text-[#e50914]"><i class="fas fa-bookmark"></i> My List</a>
+            </div>
+            <div class="flex items-center gap-x-6">
+                <i onclick="toggleSearch()" class="fas fa-search text-xl cursor-pointer"></i>
+                <div onclick="showNotifications()" class="relative cursor-pointer"><i class="fas fa-bell text-xl"></i></div>
+                <div onclick="toggleProfileMenu()" class="flex items-center cursor-pointer">
+                    <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-sm font-bold">J</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-screen-2xl mx-auto px-8 pt-28 pb-16">
+        <h1 class="text-5xl font-bold mb-8">Browse All Content</h1>
+
+        <!-- Filters -->
+        <div class="flex flex-wrap gap-6 mb-10 bg-zinc-900 p-6 rounded-3xl">
+            <div>
+                <label class="block text-sm text-zinc-400 mb-2">Genre</label>
+                <select id="genre-filter" onchange="filterContent()" class="bg-zinc-800 border border-white/20 rounded-xl px-4 py-3 text-white">
+                    <option value="all">All Genres</option>
+                    <option value="Action">Action</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Thriller">Thriller</option>
+                    <option value="Adventure">Adventure</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm text-zinc-400 mb-2">Sort By</label>
+                <select id="sort-filter" onchange="filterContent()" class="bg-zinc-800 border border-white/20 rounded-xl px-4 py-3 text-white">
+                    <option value="rating-desc">Highest Rated</option>
+                    <option value="year-desc">Newest First</option>
+                    <option value="title-asc">A-Z</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Results Grid -->
+        <div id="content-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-6"></div>
+    </div>
+
+    <!-- VIDEO MODAL -->
+    <div id="video-modal" onclick="if(event.target.id==='video-modal')closeModal()" class="hidden fixed inset-0 bg-black/95 z-[9999] flex items-center justify-center">
+        <div class="bg-zinc-900 rounded-3xl max-w-4xl w-full mx-4 overflow-hidden">
+            <div class="flex justify-between items-center px-8 py-5 border-b border-white/10">
+                <h3 id="modal-title" class="text-2xl font-semibold"></h3>
+                <button onclick="closeModal()" class="text-4xl hover:text-[#e50914]">×</button>
+            </div>
+            <div id="modal-content" class="p-8"></div>
+        </div>
+    </div>
+
+    <script>
+        // Full dataset (movies + TV shows)
+        const allContent = [
+            {id:1, title:"Dune: Part Two", year:2024, rating:8.9, genre:"Sci-Fi", type:"movie", poster:"images/dune.jpg"},
+            {id:7, title:"Deadpool & Wolverine", year:2024, rating:8.4, genre:"Action", type:"movie", poster:"images/dead.jpg"},
+            {id:2, title:"Oppenheimer", year:2023, rating:8.6, genre:"Drama", type:"movie", poster:"images/op.jpg"},
+            {id:4, title:"The Batman", year:2022, rating:8.2, genre:"Action", type:"movie", poster:"images/batman.jpg"},
+            {id:9, title:"Top Gun: Maverick", year:2022, rating:8.3, genre:"Action", type:"movie", poster:"https://picsum.photos/id/251/300/450"},
+            {id:10, title:"John Wick: Chapter 4", year:2023, rating:7.7, genre:"Action", type:"movie", poster:"images/john.jpg"},
+            {id:17, title:"Echoes of Eternity", year:2025, rating:9.2, genre:"Sci-Fi", type:"movie", poster:"images/echo.jpg"},
+            {id:29, title:"Starfall", year:2025, rating:9.0, genre:"Sci-Fi", type:"movie", poster:"https://picsum.photos/id/700/300/450"},
+            {id:3, title:"Barbie", year:2023, rating:7.2, genre:"Comedy", type:"movie", poster:"images/barbie.jpg"},
+            {id:8, title:"Spider-Man: No Way Home", year:2021, rating:8.3, genre:"Action", type:"movie", poster:"images/spider.jpg"},
+            {id:20, title:"The Last Signal", year:2025, rating:8.4, genre:"Thriller", type:"movie", poster:"https://picsum.photos/id/520/300/450"},
+            {id:24, title:"Kingdom of Ash", year:2025, rating:8.7, genre:"Adventure", type:"movie", poster:"https://picsum.photos/id/600/300/450"},
+            {id:12, title:"Shōgun", year:2024, rating:9.1, genre:"Drama", type:"tv", poster:"https://picsum.photos/id/342/300/450"},
+            {id:14, title:"Fallout", year:2024, rating:8.7, genre:"Sci-Fi", type:"tv", poster:"https://picsum.photos/id/380/300/450"},
+            {id:21, title:"Arcane Season 2", year:2024, rating:9.3, genre:"Action", type:"tv", poster:"images/ar.jpg"},
+            {id:11, title:"House of the Dragon", year:2022, rating:8.5, genre:"Drama", type:"tv", poster:"https://picsum.photos/id/318/300/450"},
+            {id:16, title:"The Boys", year:2019, rating:8.7, genre:"Action", type:"tv", poster:"https://picsum.photos/id/420/300/450"}
+        ];
+
+        let myList = JSON.parse(localStorage.getItem('streamflixMyList')) || [];
+        let userRatings = JSON.parse(localStorage.getItem('streamflixRatings')) || {};
+
+        function saveMyList() {
+            localStorage.setItem('streamflixMyList', JSON.stringify(myList));
+        }
+
+        function toggleMyList(id, btn) {
+            event.stopImmediatePropagation();
+            if (myList.includes(id)) {
+                myList = myList.filter(item => item !== id);
+                btn.textContent = "+ MY LIST";
+                btn.classList.remove("bg-red-600", "text-white");
+            } else {
+                myList.push(id);
+                btn.textContent = "REMOVE";
+                btn.classList.add("bg-red-600", "text-white");
+            }
+            saveMyList();
+        }
+
+        function rateMovie(id, rating) {
+            event.stopImmediatePropagation();
+            userRatings[id] = rating;
+            localStorage.setItem('streamflixRatings', JSON.stringify(userRatings));
+            filterContent(); // Refresh to show updated ratings
+        }
+
+        function getAverageRating(id) {
+            return userRatings[id] || allContent.find(m => m.id === id)?.rating || 8.0;
+        }
+
+        function filterContent() {
+            const genre = document.getElementById('genre-filter').value;
+            const sort = document.getElementById('sort-filter').value;
+
+            let filtered = allContent;
+
+            // Genre filter
+            if (genre !== "all") {
+                filtered = filtered.filter(item => item.genre === genre);
+            }
+
+            // Sort
+            if (sort === "rating-desc") {
+                filtered.sort((a, b) => getAverageRating(b.id) - getAverageRating(a.id));
+            } else if (sort === "year-desc") {
+                filtered.sort((a, b) => b.year - a.year);
+            } else if (sort === "title-asc") {
+                filtered.sort((a, b) => a.title.localeCompare(b.title));
+            }
+
+            renderGrid(filtered);
+        }
+
+        function renderGrid(items) {
+            const grid = document.getElementById('content-grid');
+            grid.innerHTML = '';
+
+            items.forEach(item => {
+                const isInList = myList.includes(item.id);
+                const currentRating = getAverageRating(item.id);
+
+                const card = document.createElement('div');
+                card.className = "movie-card bg-zinc-900";
+                card.innerHTML = `
+                    <img src="${item.poster}" alt="${item.title}">
+                    <div class="movie-overlay">
+                        <div class="w-full space-y-3">
+                            <div class="flex gap-2">
+                                <button onclick="event.stopImmediatePropagation(); playContent(${item.id})" class="action-btn flex-1 bg-white text-black">PLAY</button>
+                                <button onclick="event.stopImmediatePropagation(); watchTrailer(${item.id})" class="action-btn flex-1 bg-white/30 hover:bg-white/40">TRAILER</button>
+                            </div>
+                            <button onclick="event.stopImmediatePropagation(); toggleMyList(${item.id}, this)" 
+                                    class="action-btn w-full border border-white hover:bg-white/10 ${isInList ? 'bg-red-600 text-white' : ''}">
+                                ${isInList ? 'REMOVE' : '+ MY LIST'}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="p-4">
+                        <div class="font-semibold">${item.title}</div>
+                        <div class="flex items-center justify-between text-xs text-zinc-400">
+                            <span>${item.year} • ${item.type.toUpperCase()}</span>
+                            <span class="flex items-center">
+                                <span onclick="event.stopImmediatePropagation(); rateMovie(${item.id}, 8)" class="star text-yellow-400">★</span>
+                                ${currentRating.toFixed(1)}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => window.location.href = `movie.html?id=${item.id}`;
+                grid.appendChild(card);
+            });
+        }
+
+        function playContent(id) {
+            event.stopImmediatePropagation();
+            const item = allContent.find(m => m.id === id);
+            document.getElementById('modal-title').innerHTML = `Now Playing: <span class="text-[#e50914]">${item.title}</span>`;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="aspect-video bg-zinc-950 rounded-2xl flex items-center justify-center">
+                    <div class="text-center">
+                        <i class="fas fa-play-circle text-8xl text-white/70 mb-6"></i>
+                        <p class="text-xl">Streaming in 4K HDR</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('video-modal').classList.remove('hidden');
+        }
+
+        function watchTrailer(id) {
+            event.stopImmediatePropagation();
+            const trailers = {1:"U_x15k9jY7E",7:"xB5ce8j8Z8o",2:"uYPbbksJxIg",12:"T7f3z7r7Z8Q",14:"aWzlQ2N6qqg"};
+            document.getElementById('modal-title').innerHTML = `Trailer`;
+            document.getElementById('modal-content').innerHTML = `
+                <div class="aspect-video">
+                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/${trailers[id] || 'dQw4w9wgxcq'}" frameborder="0" allowfullscreen></iframe>
+                </div>
+            `;
+            document.getElementById('video-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('video-modal').classList.add('hidden');
+        }
+
+        function toggleSearch() { alert("Global search"); }
+        function showNotifications() { alert("New content added!"); }
+        function toggleProfileMenu() { alert("Premium Account"); }
+
+        // Initialize
+        window.onload = () => {
+            filterContent();
+        };
+    </script>
+</body>
+</html>
